@@ -1,0 +1,73 @@
+data rats;
+input Age Cage Mass;
+	sqrtmass = sqrt(mass);
+	logmass = log10(mass);
+	invmass = 1/mass;
+	sqrtage = sqrt(age);
+	logage = log10(age);
+	invage = 1/age;
+	sqrtcage = sqrt(cage);
+	logcage = log10(cage);
+	invcage = 1/cage;
+cards;
+20 0 38.785
+20 0 36.025
+20 2 32.858
+20 2 36.085
+20 5 34.418
+30 0 63.981
+30 0 65.864
+30 1 61.121
+30 3 58.216
+30 3 64.055
+35 0 74.081
+35 2 67.812
+35 2 73.214
+35 4 59.243
+35 4 69.036
+40 0 86.660
+40 1 83.584
+40 3 84.631
+50 0 108.195
+50 0 108.472
+50 2 105.174
+50 2 103.255
+50 4 102.763
+50 5 103.219
+;
+
+/*Stepwise Multiple Regression*/
+
+proc reg data=rats;
+model   mass= age cage / selection = stepwise;
+	plot mass*age = '*'  predicted.*age ='P'  / 
+           overlay;
+	plot residual.*predicted.; 
+	output out=resid r=res   p=pre;
+	RUN;
+proc univariate data=resid normal;
+	var res;
+	run;
+/*Stepwise Multiple Regression with AIC*/
+
+proc reg data=rats;
+model   mass= age cage / AIC selection =adjrsq;
+	plot mass*age = '*'  predicted.*age ='P'  / 
+           overlay;
+	plot residual.*predicted.; 
+RUN;
+
+
+/*Standardized Regression Coefficients*/
+proc reg data=rats;
+	model mass= age cage / stb;
+	plot mass*age = '*'  predicted.*age ='P'  /          
+           overlay;
+	plot residual.*predicted.;
+	run;
+	
+proc glm data=rats;
+*for LOF test;
+	class age cage; /*one way anova with x as variable*/
+	model   mass= age cage;
+run;

@@ -1,0 +1,64 @@
+data enzymes;
+	input   treatment $ val;
+	cards;
+17B 0.039
+17B 0.044
+17B 0.033
+17B 0.036
+17B 0.038
+Test 0.019
+Test 0.012
+Test 0.014
+Test 0.018
+Test 0.015
+7A 0.046
+7A 0.049
+7A 0.053
+7A 0.055
+7A 0.048
+7B 0.051
+7B 0.055
+7B 0.062
+7B 0.058
+7B 0.057
+;
+
+/* Test assumption of homogenous variance using Brown-Forsythe Test; p = .9663 not< .05 => equal var*/
+/* Test assumption of resids normally dist: shap test p = .23 not< .05 => normal disted*/
+PROC GLM DATA = enzymes;	        
+     CLASS treatment;
+     MODEL val = treatment;
+MEANS treatment / REGWQ TUKEY HOVTEST=BF;
+output out=resdata  
+             r=resid p=predict;
+RUN;
+
+proc univariate data=resdata 
+     plot normal;
+     var resid val;
+     run;
+     
+proc gplot data=resdata;
+     plot resid*predict;
+RUN;
+PROC GLM DATA = enzymes;
+     CLASS treatment;
+     MODEL val = treatment;
+     MEANS treatment;
+     CONTRAST '17B VS. 7A, 7B' 
+                treatment 2 -1 -1 0;
+     ESTIMATE '17B VS. 7A, 7B'  
+                treatment 2 -1 -1 0/ DIVISOR=2;
+     CONTRAST 'Test vs 17B' 
+                treatment -1 0 0 1;
+     ESTIMATE 'Test vs 17B'  
+                treatment -1 0 0 1 / DIVISOR=1;
+     CONTRAST 'Test vs 7A' 
+                treatment 0 -1 0 1;
+     ESTIMATE 'Test vs 7A'
+                treatment 0 -1 0 1 / DIVISOR=1;
+     CONTRAST 'Test vs 7B' 
+                treatment 0 0 -1 1;
+     ESTIMATE 'Test vs 7B'
+                treatment 0 0 -1 1 / DIVISOR=1;
+RUN;

@@ -1,0 +1,92 @@
+data regress;
+	input   mosquito temp Leafmass days Mass;/*group x1 x2 y*/  
+	sqrtval = sqrt(mass);
+	logval = log10(mass);
+	inverval = 1/mass;
+cards; 
+5 15 29 31 0.1761
+7 15 33 34 0.1410
+8 15 35 28 0.2876
+11 15 40 24 0.3636
+12 15 42 26 0.3036
+16 15 49 26 0.3194
+18 15 53 25 0.4123
+19 15 54 26 0.4799
+22 15 62 27 0.4518
+25 15 66 26 0.5223
+26 15 68 24 0.6478
+27 15 69 26 0.5087
+30 15 78 24 0.5642
+31 15 81 25 0.4769
+33 15 85 31 0.4703
+34 15 88 26 0.6492
+35 15 89 24 0.8107
+38 15 95 25 0.6655
+40 15 100 25 0.6585
+41 20 23 22 0.1806
+42 20 25 24 0.1069
+45 20 29 24 0.2024
+46 20 32 16 0.3265
+50 20 38 16 0.3728
+51 20 41 17 0.4049
+52 20 42 18 0.5641
+57 20 52 17 0.4097
+60 20 57 16 0.5211
+63 20 63 15 0.6903
+64 20 64 15 0.6159
+66 20 68 16 0.6923
+67 20 69 15 0.6825
+72 20 83 16 0.5059
+74 20 89 16 0.6785
+75 20 91 15 0.8204
+76 20 92 15 0.6973
+77 20 95 17 0.6576
+80 20 100 16 0.7709
+82 25 25 14 0.2092
+84 25 28 14 0.1812
+88 25 36 12 0.2948
+89 25 37 12 0.2379
+94 25 46 11 0.3927
+95 25 49 12 0.3773
+99 25 55 12 0.3954
+102 25 63 12 0.4337
+103 25 64 11 0.4574
+104 25 65 12 0.5045
+105 25 67 12 0.4445
+106 25 68 12 0.6317
+110 25 80 12 0.6498
+113 25 88 12 0.7181
+114 25 89 12 0.7217
+117 25 95 12 0.7942
+118 25 97 11 0.7115
+120 25 102 12 .
+;
+PROC GLM DATA=REGRESS;	
+*** ANCOVA STEP 1 -- TEST FOR EQUAL SLOPES;
+     CLASS temp;
+     MODEL inverval =temp Leafmass temp*Leafmass  / 
+            SS3 SOLUTION;
+     run;
+
+PROC GLM DATA=REGRESS;
+*ANCOVA STEP 2 - TEST COMMON-SLOPE MODEL;
+     CLASS temp;
+     MODEL inverval =temp Leafmass / SS3 SOLUTION;
+     LSMEANS temp / 
+                  STDERR PDIFF ADJUST=TUKEY;
+	output out=residuals 
+		r=res p=pre;
+proc univariate data=residuals normal;
+     var res;
+proc gplot data=residuals;
+     plot res*pre;
+run;
+
+/*
+PROC GLM DATA=REGRESS;
+*LINEAR MODEL - ESTIMATES OF UNEQUAL SLOPES;
+     CLASS temp;
+     MODEL Mass=temp Leafmass(temp) / 
+             SS3 SOLUTION;
+RUN;
+*/

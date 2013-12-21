@@ -1,0 +1,56 @@
+data rats;
+input Age Cage Mass;
+	sqrtmass = sqrt(mass);
+	sqrtage = sqrt(age);
+cards;
+20 0 38.785
+20 0 36.025
+20 2 32.858
+20 2 36.085
+20 5 34.418
+30 0 63.981
+30 0 65.864
+30 1 61.121
+30 3 58.216
+30 3 64.055
+35 0 74.081
+35 2 67.812
+35 2 73.214
+35 4 59.243
+35 4 69.036
+40 0 86.660
+40 1 83.584
+40 3 84.631
+50 0 108.195
+50 0 108.472
+50 2 105.174
+50 2 103.255
+50 4 102.763
+50 5 103.219
+;
+
+proc reg data=rats;
+*linear regression;
+	model   sqrtmass= sqrtage;
+	plot sqrtmass*sqrtage= '*'  predicted.*sqrtage='P' /*predicted is a standard thing used in proc reg*/
+		 / overlay;
+	plot residual.*predicted.;
+	output out=resid r=res   p=pre;
+proc univariate data=resid normal;
+	var res;
+*test residuals;
+proc glm data=rats;
+*for LOF test;
+	class sqrtage; /*one way anova with x as variable*/
+	model   sqrtmass= sqrtage;
+run;
+proc glm data=rats;
+*regression in glm;
+	model   sqrtmass= sqrtage/ solution;
+	output  out=resid  r=res  p=pre;
+proc plot data=resid;
+	plot sqrtmass*sqrtage='*' pre*sqrtage='P' / overlay;
+	plot res*pre;
+proc univariate data=resid normal;
+	var res;
+run;

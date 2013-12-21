@@ -1,0 +1,80 @@
+data blackfly;
+input path $ food $  mass;
+cards;
+NoPathogen low 0.279
+NoPathogen low 0.23768
+NoPathogen low 0.29336
+NoPathogen low 0.29664
+NoPathogen low 0.2743
+NoPathogen low 0.19006
+NoPathogen med 0.42885
+NoPathogen med 0.54738
+NoPathogen med 0.39781
+NoPathogen med 0.61233
+NoPathogen med 0.5665
+NoPathogen med 0.52902
+NoPathogen high 0.66694
+NoPathogen high 0.75648
+NoPathogen high 0.75106
+NoPathogen high 0.52152
+NoPathogen high 0.75586
+NoPathogen vh 0.73259
+NoPathogen vh 0.75253
+NoPathogen vh 0.90228
+NoPathogen vh 0.96427
+NoPathogen vh 0.93226
+NoPathogen vh 0.91849
+Iridovirus low 0.284
+Iridovirus low 0.25566
+Iridovirus low 0.20823
+Iridovirus med 0.20311
+Iridovirus med 0.29445
+Iridovirus med 0.38443
+Iridovirus med 0.30822
+Iridovirus med 0.22829
+Iridovirus high 0.62152
+Iridovirus high 0.52282
+Iridovirus high 0.52766
+Iridovirus high 0.52515
+Iridovirus high 0.47309
+Iridovirus vh 0.86014
+Iridovirus vh 0.9786
+Iridovirus vh 0.74491
+Iridovirus vh 0.76306
+Microspor low 0.17269
+Microspor low 0.12513
+Microspor low 0.13922
+Microspor low 0.10145
+Microspor low 0.18401
+Microspor med 0.41691
+Microspor med 0.36966
+Microspor med 0.38613
+Microspor med 0.42584
+Microspor med 0.36232
+Microspor med 0.33206
+Microspor high 0.71352
+Microspor high 0.64478
+Microspor high 0.65305
+Microspor high 0.71887
+Microspor vh 0.82237
+Microspor vh 0.79304
+Microspor vh 0.82483
+Microspor vh 0.86125
+Microspor vh 0.8279
+
+;
+proc glm data = blackfly;
+	class path food;
+	model mass = path food path*food /
+       		ss1 ss3;
+	means path food path*food / /* doesnt work for factorial design */
+		regwq hovtest=bf; 
+	lsmeans path food path*food /
+		stderr pdiff /*adjust=tukey*/; /* got rid of tukey so you can adjust for how many comparisons you want calculate alpha c = .05/# of tests*/
+	output out=residuals 
+		r=res p=pre;
+proc univariate data=residuals normal;
+     var res;
+proc gplot data=residuals;
+     plot res*pre;
+run;

@@ -1,0 +1,65 @@
+data unbalanced;
+INPUT site $ zone $ y;
+CARDS;
+A SZ(-TR) 4
+A SZ(-TR) 3.317
+A SZ(-TR) 3.162
+A SZ(-TR) 4
+A SZ(-TR) 3.873
+A SZ(+TR) 3.464
+A SZ(+TR) .
+A SZ(+TR) 1.732
+A SZ(+TR) 2.236
+A SZ(+TR) 6.557
+A MZ 0
+A MZ 0
+A MZ 4.123
+A MZ .
+A MZ .
+A LZ .
+A LZ 0
+A LZ 0
+A LZ 0
+A LZ 5.745
+B SZ(-TR) 3.162
+B SZ(-TR) 3.464
+B SZ(-TR) 4.123
+B SZ(-TR) 2.282
+B SZ(-TR) 2.282
+B SZ(+TR) 3.742
+B SZ(+TR) 4
+B SZ(+TR) 2.646
+B SZ(+TR) 3.873
+B SZ(+TR) 1.414
+B MZ 0
+B MZ 5
+B MZ 7.071
+B MZ 4.123
+B MZ 7.071
+B LZ 0
+B LZ .
+B LZ 2.828
+B LZ .
+B LZ .
+;
+
+proc glm data = unbalanced;
+title '***MIXED MODEL ***';
+     class site zone;
+     model y=site zone site*zone / SS3;
+     random site site*zone / test;
+     test H=zone E=site*zone;
+	 lsmeans zone / stderr pdiff;
+	 lsmeans zone / E=site*zone stderr pdiff;
+*** NOTE: MUST SPECIFY CORRECT ERROR TERM FOR lsmeans IN GLM ***;
+proc varcomp data = unbalanced;
+     class site zone;
+	 MODEL y = zone site site*zone /fixed = 1;
+*** NOTE: LIST FIXED EFFECTS FIRST IN VARCOMP ***;
+proc mixed data = unbalanced;
+     class site zone;
+	 model Y = zone;
+***NOTE: ONLY FIXED EFFECTS APPEAR IN MODEL***;
+	 random site site*zone;
+	 lsmeans zone / pdiff;
+RUN;

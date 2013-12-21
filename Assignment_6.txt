@@ -1,0 +1,83 @@
+data soil;
+input fruit $ trt $  flower;
+cards;
+not control 41
+not control 46
+not control 37
+not control 48
+not control 43
+not control 49
+not control 41
+not control 45
+not control 45
+not control 42
+not control 39
+not control 45
+not nitrogen 49
+not nitrogen 52
+not nitrogen 47
+not nitrogen 53
+not nitrogen 46
+not nitrogen 56
+not nitrogen 47
+not nitrogen 58
+not nitrogen 50
+not nitrogen 54
+not nitrogen 45
+not nitrogen 50
+not legume 61
+not legume 55
+not legume 62
+not legume 59
+not legume 57
+not legume 65
+not legume 56
+not legume 57
+removed control 48
+removed control 56
+removed control 50
+removed control 45
+removed control 49
+removed control 52
+removed control 50
+removed control 54
+removed control 46
+removed control 46
+removed nitrogen 49
+removed nitrogen 59
+removed nitrogen 50
+removed nitrogen 55
+removed nitrogen 53
+removed nitrogen 54
+removed nitrogen 55
+removed nitrogen 55
+removed nitrogen 47
+removed nitrogen 53
+removed nitrogen 57
+removed nitrogen 51
+removed legume 60
+removed legume 60
+removed legume 57
+removed legume 53
+removed legume 55
+removed legume 57
+removed legume 55
+removed legume 57
+removed legume 59
+removed legume 58
+;
+proc glm data = soil;
+	class fruit trt;
+	model flower = fruit trt fruit*trt /
+       		ss1 ss3;
+	means fruit trt fruit*trt / /* doesnt work for factorial design */
+		regwq hovtest=bf; 
+	lsmeans fruit trt fruit*trt /
+		stderr pdiff /*adjust=tukey*/; /* got rid of tukey so you can adjust for how many comparisons you want calculate alpha c = .05/# of tests*/
+	output out=residuals 
+		r=res p=pre;
+proc univariate data=residuals normal;
+     var res;
+proc gplot data=residuals;
+     plot res*pre;
+run;

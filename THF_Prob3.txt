@@ -1,0 +1,30 @@
+/*one sample test*/
+data insects;
+input TREE fert cont;
+diff = fert - cont;
+cards;
+1 2.98 2.38
+2 3.73 3.17
+3 3.67 3.16
+4 3.60 2.52
+5 3.97 2.48
+6 2.64 2.73
+7 3.45 2.99
+8 2.08 2.24
+;
+
+/*Gives test for normality: shapiro wilk: if p>.05 then not normally distributed.*/
+/*If normal then use student's t test. If not the use non parametric signed rank test.*/
+proc univariate data = insects plot normal;
+	var diff;
+	run;
+
+proc ttest data = insects 
+	ho = 0 alpha = 0.05;
+	paired fert*cont;
+	title 'one sample';
+	run;
+
+proc means data = insects;
+	var fert cont;
+	run;

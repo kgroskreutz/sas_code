@@ -1,0 +1,122 @@
+/* start part a */
+
+data random2;
+	retain seed1 5079959;
+	retain seed2 5196452;
+
+	do i = 1 to 10;
+		r1 = ranuni(seed1);
+		r2 = ranuni(seed2);
+
+		if r1 < 0.55 and r2 < 0.55
+			then females = 2;
+		else if r1 > 0.55 and r2 > .55
+			then females = 0;
+		else females = 1;
+
+	output;
+end;
+
+/*proc print data = random2;
+run;*/
+
+proc univariate data = random2 freq; /*spit out freq of observations*/
+	var females;
+run;
+
+*proc gchart data = random2;
+*	vbar FEMALES/MIDPOINTS = 0 1 2;
+
+data random3;
+	retain seed1 8546156;
+	retain seed2 6854115;
+
+	do i = 1 to 50;
+		r1 = ranuni(seed1);
+		r2 = ranuni(seed2);
+
+		if r1 < 0.55 and r2 < 0.55
+			then females = 2;
+		else if r1 > 0.55 and r2 > .55
+			then females = 0;
+		else females = 1;
+
+	output;
+end;
+
+proc univariate data = random3 freq; /*spit out freq of observations*/
+	var females;
+run;
+
+data random4;
+	retain seed1 5516358;
+	retain seed2 4598541;
+
+	do i = 1 to 100;
+		r1 = ranuni(seed1);
+		r2 = ranuni(seed2);
+
+		if r1 < 0.55 and r2 < 0.55
+			then females = 2;
+		else if r1 > 0.55 and r2 > .55
+			then females = 0;
+		else females = 1;
+
+	output;
+end;
+
+proc univariate data = random4 freq; /*spit out freq of observations*/
+	var females;
+run;
+
+data random5;
+	retain seed1 6541635;
+	retain seed2 5168511;
+
+	do i = 1 to 1000;
+		r1 = ranuni(seed1);
+		r2 = ranuni(seed2);
+
+		if r1 < 0.55 and r2 < 0.55
+			then females = 2;
+		else if r1 > 0.55 and r2 > .55
+			then females = 0;
+		else females = 1;
+
+	output;
+end;
+
+proc univariate data = random5 freq; /*spit out freq of observations*/
+	var females;
+run;
+/*proc print;
+ var r1 r2 females;
+run;*/
+/* end part a*/
+
+/* start prt b*/
+
+data randomnorm;
+	retain seed1 468451;
+		do Ns = 4, 16, 64, 100;
+			do j = 1 to 100;
+				do number = 1 to Ns;
+					x1 = rannor(seed1);
+				output;
+			end;
+		end;
+	end;
+run;
+
+proc univariate data = randomnorm noprint;
+	var x1;
+		by Ns j notsorted;
+		output out = summary mean = mean n = n std = sd;
+		run;
+
+proc print data = summary;
+
+proc means data = summary; /* how variable are the means when sampling the same distribution.*/
+	by Ns notsorted;
+	var mean;
+run;

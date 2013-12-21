@@ -1,0 +1,126 @@
+data nutrientdata;
+	input   treatment $ val;
+	sqrtval = sqrt(val);
+	logval = log10(val);
+	inverval = 1/val;
+	cards;
+Control 45
+Control 51
+Control 46
+Control 53
+Control 48
+Control 43
+Control 51
+Control 47
+Boron 58
+Boron 62
+Boron 61
+Boron 59
+Boron 63
+Boron 55
+Boron 66
+Boron 57
+Copper 52
+Copper 49
+Copper 47
+Copper 55
+Copper 55
+Copper 45
+Copper 54
+Copper 53
+Potassium 54
+Potassium 52
+Potassium 53
+Potassium 60
+Potassium 50
+Potassium 53
+Potassium 51
+Potassium 60
+Phosphorus 56
+Phosphorus 64
+Phosphorus 57
+Phosphorus 59
+Phosphorus 62
+Phosphorus 59
+Phosphorus 61
+Phosphorus 56
+;
+
+/* Test assumption of homogenous variance using Brown-Forsythe Test; p = .9663 not< .05 => equal var*/
+/* Test assumption of resids normally dist: shap test p = .23 not< .05 => normal disted*/
+PROC GLM DATA = nutrientdata;	        
+     CLASS treatment;
+     MODEL val = treatment;
+MEANS treatment / REGWQ TUKEY HOVTEST=BF;
+output out=resdata  
+             r=resid p=predict;
+RUN;
+
+proc univariate data=resdata 
+     plot normal;
+     var resid val;
+     run;
+     
+proc gplot data=resdata;
+     plot resid*predict;
+RUN;
+PROC GLM DATA = nutrientdata;
+     CLASS treatment;
+     MODEL val = treatment;
+     MEANS treatment;
+     CONTRAST 'CONTROL VS. treatment' 
+                treatment -1 4 -1 -1 -1;
+     ESTIMATE 'CONTROL VS. treatment'  
+                treatment -1 4 -1 -1 -1/ DIVISOR=4;
+     CONTRAST 'Boron, Copper vs Potassium, Phosphorus' 
+                treatment 1 0 1 -1 -1;
+     ESTIMATE 'Boron, Copper vs Potassium, Phosphorus'  
+                treatment 1 0 1 -1 -1 / DIVISOR=2;
+     CONTRAST 'Boron vs Copper' 
+                treatment 1 0 -1 0 0;
+     ESTIMATE 'Boron vs Copper'
+                treatment 1 0 -1 0 0 / DIVISOR=1;
+     CONTRAST 'Potassium vs Phosphorus' 
+                treatment 0 0 0 -1 1;
+     ESTIMATE 'Potassium vs Phosphorus'
+                treatment 0 0 0 -1 1 / DIVISOR=1;
+RUN;
+
+PROC GLM DATA = nutrientdata;	        
+     CLASS treatment;
+     MODEL sqrtval = treatment;
+MEANS treatment / REGWQ TUKEY HOVTEST=BF;
+output out=sqrtresdata  
+             r=resid p=predict;
+RUN;
+
+proc univariate data=sqrtresdata 
+     plot normal;
+     var resid sqrtval;
+     run;
+
+PROC GLM DATA = nutrientdata;	        
+     CLASS treatment;
+     MODEL logval = treatment;
+MEANS treatment / REGWQ TUKEY HOVTEST=BF;
+output out=resdata  
+             r=resid p=predict;
+RUN;
+
+proc univariate data=resdata 
+     plot normal;
+     var resid logval;
+     run;
+
+PROC GLM DATA = nutrientdata;	        
+     CLASS treatment;
+     MODEL inverval = treatment;
+MEANS treatment / REGWQ TUKEY HOVTEST=BF;
+output out=resdata  
+             r=resid p=predict;
+RUN;
+
+proc univariate data=resdata 
+     plot normal;
+     var resid inverval;
+     run;

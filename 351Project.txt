@@ -1,0 +1,82 @@
+data plant;
+input Myc $ Comp $ length;
+cards;
+Control T2 64.5
+Control T2 60.5
+Control T2 54.8
+Control T2 65.4
+Control T2 48.5
+Control T2 46.2
+Control T2 78.2
+Control T2 65.4
+Control T2 54.6
+Control T2 45.5
+Control T4 29.1
+Control T4 41.0
+Control T4 45.6
+Control T4 55.8
+Control T4 39.0
+Control T4 33.1
+Control T4 27.8
+Control T4 45.7
+Control T4 39.0
+Control T4 43.3
+Control T2B2 31.9
+Control T2B2 22.7
+Control T2B2 31.3
+Control T2B2 32.2
+Control T2B2 25.6
+Control T2B2 23.0
+Control T2B2 27.7
+Control T2B2 26.9
+Control T2B2 39.7
+Control T2B2 41.7
+Mycorr T2 43.0
+Mycorr T2 59.0
+Mycorr T2 31.5
+Mycorr T2 43.0
+Mycorr T2 64.8
+Mycorr T2 55.2
+Mycorr T2 57.3
+Mycorr T2 43.1
+Mycorr T2 50.2
+Mycorr T2 55.5
+Mycorr T4 33.1
+Mycorr T4 40.2
+Mycorr T4 42.3
+Mycorr T4 30.4
+Mycorr T4 39.3
+Mycorr T4 43.4
+Mycorr T4 43.1
+Mycorr T4 51.3
+Mycorr T4 43.0
+Mycorr T4 51.2
+Mycorr T2B2 28.0
+Mycorr T2B2 28.3
+Mycorr T2B2 21.7
+Mycorr T2B2 33.8
+Mycorr T2B2 47.4
+Mycorr T2B2 45.4
+Mycorr T2B2 32.4
+Mycorr T2B2 35.6
+Mycorr T2B2 38.4
+Mycorr T2B2 34.8
+;
+
+proc glm data = plant;
+	class Myc Comp;
+	model length= Myc Comp Myc *Comp /
+       		ss1 ss3;
+	means Myc Comp Myc *Comp  / /* doesnt work for factorial design */
+		regwq hovtest=bf; 
+	lsmeans Myc Comp Myc *Comp /
+		stderr pdiff /*adjust=tukey*/; /* got rid of tukey so you can adjust for how many comparisons you want calculate alpha c = .05/# of tests*/
+	output out=residuals 
+		r=res p=pre;
+proc univariate data=residuals plot normal;
+     var res;
+proc gplot data=residuals;
+     plot res*pre;
+run;
+
+
